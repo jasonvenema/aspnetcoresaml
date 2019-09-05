@@ -23,12 +23,9 @@ namespace WebApplication1.Controllers
         {
             ViewData["ReturnUrl"] = returnUrl;
             var redirectUrl = Url.Content("~/");
-            var result = Challenge(
+            return Challenge(
                 new AuthenticationProperties { RedirectUri = redirectUrl },
                 WsFederationDefaults.AuthenticationScheme);
-
-            var items = result.Properties.Items;
-            return result;
         }
 
         [Authorize]

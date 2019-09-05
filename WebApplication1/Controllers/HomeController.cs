@@ -16,27 +16,6 @@ namespace WebApplication1.Controllers
     {
         public IActionResult Index()
         {
-            if (User.Identity.IsAuthenticated)
-            {
-                //System.IdentityModel.Tokens. bootstrapContext = User.Identities.First().BootstrapContext;
-                //var token = bootstrapContext.SecurityToken;
-
-                try
-                {
-                    System.Security.Claims.ClaimsIdentity identity = User.Identity as System.Security.Claims.ClaimsIdentity;
-                    string userAccessToken = identity.BootstrapContext as string;
-                    string userName = (User.FindFirst(ClaimTypes.Upn))?.Value;
-
-                    var token = AuthenticationHttpContextExtensions.GetTokenAsync(
-                        Request.HttpContext, WsFederationDefaults.AuthenticationScheme, "access_token").Result;
-                    //Microsoft.AspNetCore.Http.Authentication.AuthenticationProperties
-                }
-                catch
-                {
-                    // Swallow
-                }
-            }
-
             return View();
         }
 

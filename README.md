@@ -1,5 +1,3 @@
-# aspnetcoresaml
+# ASP .NET Core + Azure AD + SAML assertions
 
-Sample project to go with this blog post on Authentication in ASP.NET Core with SAML v2
-
-https://cmatskas.com/asp-net-core-saml-authentication-with-azure-ad/
+This project demonstrates how to request a SAML token from Azure AD. The Startup.cs method ConfigureServices() also demonstrates how to get the assertion text as XML and write it to a file.

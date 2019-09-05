@@ -1,0 +1,45 @@
+<saml:Assertion ID="_57122a7e-2908-48f0-b01e-3662abe43800" IssueInstant="2019-09-04T15:52:53.951Z" Version="2.0" 
+    xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+    <saml:Issuer>https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/</saml:Issuer>
+    <saml:Subject>
+        <saml:NameID Format="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent">EI6iFKO8Ha-1LJURqHdoIcwUHUikqMzS8E-LJH4y_H0</saml:NameID>
+        <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer" />
+    </saml:Subject>
+    <saml:Conditions NotBefore="2019-09-04T15:47:53.951Z" NotOnOrAfter="2019-09-04T16:52:53.951Z">
+        <saml:AudienceRestriction>
+            <saml:Audience>api://0a4f3144-0cf7-4734-bbf9-54b38afd04dc</saml:Audience>
+        </saml:AudienceRestriction>
+    </saml:Conditions>
+    <saml:AttributeStatement>
+        <saml:Attribute Name="http://schemas.microsoft.com/identity/claims/tenantid">
+            <saml:AttributeValue>72f988bf-86f1-41af-91ab-2d7cd011db47</saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute Name="http://schemas.microsoft.com/identity/claims/objectidentifier">
+            <saml:AttributeValue>62346242-12b3-47be-b138-f857e3302888</saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute Name="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name">
+            <saml:AttributeValue>javene@microsoft.com</saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute Name="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname">
+            <saml:AttributeValue>Venema</saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute Name="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname">
+            <saml:AttributeValue>Jason</saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute Name="http://schemas.microsoft.com/identity/claims/displayname">
+            <saml:AttributeValue>Jason Venema</saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute Name="http://schemas.microsoft.com/identity/claims/identityprovider">
+            <saml:AttributeValue>https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/</saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute Name="http://schemas.microsoft.com/claims/authnmethodsreferences">
+            <saml:AttributeValue>http://schemas.microsoft.com/ws/2008/06/identity/authenticationmethod/x509</saml:AttributeValue>
+            <saml:AttributeValue>http://schemas.microsoft.com/claims/multipleauthn</saml:AttributeValue>
+        </saml:Attribute>
+    </saml:AttributeStatement>
+    <saml:AuthnStatement AuthnInstant="2019-09-04T15:08:07.074Z">
+        <saml:AuthnContext>
+            <saml:AuthnContextClassRef>http://schemas.microsoft.com/claims/multipleauthn</saml:AuthnContextClassRef>
+        </saml:AuthnContext>
+    </saml:AuthnStatement>
+</saml:Assertion>

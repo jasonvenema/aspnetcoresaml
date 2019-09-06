@@ -38,6 +38,7 @@
                     @if (User.Identity.IsAuthenticated)
                     {
                         <li><a asp-controller="Home" asp-action="Index">Welcome @User.Identity.Name!</a></li>
+                        <li><a asp-controller="Account" asp-action="Token">View Token</a></li>
                         <li><a asp-controller="Account" asp-action="Logout">Logout</a></li>
                     }
                     else

@@ -11,6 +11,7 @@ using System.Xml;
 using System.IO;
 using System.Text;
 using System;
+using WebApplication1.Util;
 
 namespace WebApplication1
 {
@@ -45,6 +46,39 @@ namespace WebApplication1
                 options.SaveTokens = true;
                 options.Wtrealm = "api://0a4f3144-0cf7-4734-bbf9-54b38afd04dc";
                 options.MetadataAddress = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/federationmetadata/2007-06/federationmetadata.xml";
+                options.Events.OnMessageReceived = ctx =>
+                {
+                    string userName = null;
+                    var token = ctx.ProtocolMessage.GetToken();
+
+                    using (MemoryStream strm = new MemoryStream(Encoding.UTF8.GetBytes(token)))
+                    {
+                        XmlReader reader = XmlReader.Create(strm);
+                        while (reader.Read())
+                        {
+                            if (reader.NodeType == XmlNodeType.Element && reader.Name == "Attribute")
+                            {
+                                if (reader.GetAttribute("Name") == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")
+                                {
+                                    reader.Read();
+                                    reader.Read();
+                                    userName = reader.Value;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (ctx.ProtocolMessage.IsSignInMessage)
+                    {
+                        TokenCache.AddToken(userName, token);
+                    }
+                    else if (ctx.ProtocolMessage.IsSignOutMessage)
+                    {
+                        TokenCache.RemoveToken(userName);
+                    }
+                    return Task.FromResult(0);
+                };
                 options.Events.OnSecurityTokenValidated = ctx =>
                 {
                     var token = ctx.SecurityToken as Saml2SecurityToken;

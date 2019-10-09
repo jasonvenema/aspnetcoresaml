@@ -2,12 +2,12 @@
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.WsFederation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure;
 using Microsoft.Extensions.Logging;
 using WebApplication1.Util;
+using System;
+using Sustainsys.Saml2.AspNetCore2;
 
 namespace WebApplication1.Controllers
 {
@@ -25,8 +25,16 @@ namespace WebApplication1.Controllers
         public IActionResult Token()
         {
             var token = TokenCache.GetToken(User.Identity.Name);
-            XElement x = XElement.Parse(token);
-            ViewData["Token"] = x.ToString();
+
+            if (!String.IsNullOrEmpty(token))
+            {
+                XElement x = XElement.Parse(token);
+                ViewData["Token"] = x.ToString();
+            }
+            else
+            {
+                ViewData["Token"] = "Token not found. Try logging out and then logging back in again.";
+            }
 
             return View();
         }
@@ -36,9 +44,12 @@ namespace WebApplication1.Controllers
         {
             ViewData["ReturnUrl"] = returnUrl;
             var redirectUrl = Url.Content("~/");
-            return Challenge(
-                new AuthenticationProperties { RedirectUri = redirectUrl },
-                WsFederationDefaults.AuthenticationScheme);
+
+            // ++WS-Federation
+            //return Challenge(
+            //    new AuthenticationProperties { RedirectUri = redirectUrl },
+            //    WsFederationDefaults.AuthenticationScheme);
+            return Challenge(new AuthenticationProperties { RedirectUri = redirectUrl }, Saml2Defaults.Scheme);
         }
 
         [Authorize]
@@ -46,9 +57,12 @@ namespace WebApplication1.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             var redirectUrl = Url.Content("~/");
-            return SignOut(
-                new AuthenticationProperties { RedirectUri = redirectUrl },
-                WsFederationDefaults.AuthenticationScheme);
+            return SignOut(new AuthenticationProperties { RedirectUri = redirectUrl }, Saml2Defaults.Scheme);
+
+            // ++WS-Federation
+            //return SignOut(
+            //    new AuthenticationProperties { RedirectUri = redirectUrl },
+            //    WsFederationDefaults.AuthenticationScheme);
         }
     }
 }

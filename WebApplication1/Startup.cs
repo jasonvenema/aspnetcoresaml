@@ -3,15 +3,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.WsFederation;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.IdentityModel.Tokens.Saml2;
-using System.Xml;
-using System.IO;
-using System.Text;
 using System;
-using WebApplication1.Util;
+using Sustainsys.Saml2.AspNetCore2;
+using Sustainsys.Saml2.Metadata;
+using Sustainsys.Saml2;
+using Microsoft.AspNetCore.Authentication;
+using Sustainsys.Saml2.Saml2P;
+using Microsoft.IdentityModel.Tokens.Saml2;
+using Microsoft.IdentityModel.Tokens;
 
 namespace WebApplication1
 {
@@ -39,75 +38,78 @@ namespace WebApplication1
             {
                 sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultChallengeScheme = WsFederationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultChallengeScheme = Saml2Defaults.Scheme;
+                //sharedOptions.DefaultChallengeScheme = WsFederationDefaults.AuthenticationScheme;
             })
-            .AddWsFederation(options =>
+            .AddSaml2(Saml2Defaults.Scheme, options =>
             {
-                options.SaveTokens = true;
-                options.Wtrealm = "api://0a4f3144-0cf7-4734-bbf9-54b38afd04dc";
-                options.MetadataAddress = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/federationmetadata/2007-06/federationmetadata.xml";
-                options.Events.OnMessageReceived = ctx =>
-                {
-                    string userName = null;
-                    var token = ctx.ProtocolMessage.GetToken();
+                options.SPOptions.EntityId = new EntityId("api://0a4f3144-0cf7-4734-bbf9-54b38afd04dc");
+                options.SPOptions.ReturnUrl = new Uri($"https://localhost:44358/");
 
-                    using (MemoryStream strm = new MemoryStream(Encoding.UTF8.GetBytes(token)))
+                var idp =
+                    new IdentityProvider(new EntityId("https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/"), options.SPOptions)
                     {
-                        XmlReader reader = XmlReader.Create(strm);
-                        while (reader.Read())
-                        {
-                            if (reader.NodeType == XmlNodeType.Element && reader.Name == "Attribute")
-                            {
-                                if (reader.GetAttribute("Name") == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")
-                                {
-                                    reader.Read();
-                                    reader.Read();
-                                    userName = reader.Value;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if (ctx.ProtocolMessage.IsSignInMessage)
-                    {
-                        TokenCache.AddToken(userName, token);
-                    }
-                    else if (ctx.ProtocolMessage.IsSignOutMessage)
-                    {
-                        TokenCache.RemoveToken(userName);
-                    }
-                    return Task.FromResult(0);
-                };
-                options.Events.OnSecurityTokenValidated = ctx =>
-                {
-                    var token = ctx.SecurityToken as Saml2SecurityToken;
-                    var assertion = token.Assertion;
-
-                    var settings = new XmlWriterSettings()
-                    {
-                        OmitXmlDeclaration = true,
-                        Indent = false,
-                        Encoding = Encoding.UTF8
+                        LoadMetadata = true,
+                        AllowUnsolicitedAuthnResponse = true,
+                        MetadataLocation = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/federationmetadata/2007-06/federationmetadata.xml",
+                        SingleSignOnServiceUrl = new Uri("https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/saml2"),
                     };
-
-                    StringBuilder sb = new StringBuilder();
-                    StringWriter stringWriter = new StringWriter(sb);
-                    XmlWriter responseWriter = XmlWriter.Create(stringWriter, settings);
-                    new Saml2Serializer().WriteAssertion(responseWriter, assertion);
-                    responseWriter.Flush();
-                    var assertionXml = sb.ToString();
-
-                    using (FileStream fs = new FileStream("C:\\Temp\\assert.xml", FileMode.OpenOrCreate))
-                    {
-                        var bytes = Encoding.UTF8.GetBytes(assertionXml);
-                        fs.Write(bytes, 0, bytes.Length);
-                        fs.Flush();
-                    }
-
-                    return Task.CompletedTask;
-                };
+                options.IdentityProviders.Add(idp);
             })
+            // ++WS-Federation
+            //.AddWsFederation(options =>
+            //{
+            //    options.Wtrealm = "api://0a4f3144-0cf7-4734-bbf9-54b38afd04dc";
+            //    options.MetadataAddress = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/federationmetadata/2007-06/federationmetadata.xml";
+            //    options.Events.OnMessageReceived = ctx =>
+            //    {
+            //        string userName = null;
+            //        var token = ctx.ProtocolMessage.GetToken();
+            //        var cache = services.BuildServiceProvider().GetService<IDistributedCache>();
+
+            //        using (MemoryStream strm = new MemoryStream(Encoding.UTF8.GetBytes(token)))
+            //        {
+            //            XmlReader reader = XmlReader.Create(strm);
+            //            while (reader.Read())
+            //            {
+            //                if (reader.NodeType == XmlNodeType.Element && reader.Name == "Attribute")
+            //                {
+            //                    if (reader.GetAttribute("Name") == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")
+            //                    {
+            //                        reader.Read();
+            //                        reader.Read();
+            //                        userName = reader.Value;
+            //                        break;
+            //                    }
+            //                }
+            //            }
+            //        }
+
+            //        if (!String.IsNullOrEmpty(userName))
+            //        {
+            //            if (ctx.ProtocolMessage.IsSignInMessage)
+            //            {
+            //                var wr = ctx.ProtocolMessage.Wresult;
+            //                TokenCache.AddToken(userName, wr);
+            //            }
+            //            else if (ctx.ProtocolMessage.IsSignOutMessage)
+            //            {
+            //                TokenCache.RemoveToken(userName);
+            //            }
+            //        }
+
+            //        return Task.FromResult(0);
+            //    };
+            //    options.Events.OnSecurityTokenValidated = ctx =>
+            //    {
+            //        var token = TokenCache.GetToken(ctx.Principal.Identity.Name);
+            //        return Task.CompletedTask;
+            //    };
+            //    options.Events.OnSecurityTokenReceived = ctx =>
+            //    {
+            //        return Task.CompletedTask;
+            //    };
+            //})
             .AddCookie();
 
             services.AddMvc();
@@ -118,7 +120,6 @@ namespace WebApplication1
         {
             if (env.IsDevelopment())
             {
-                app.UseBrowserLink();
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
             }
@@ -127,9 +128,10 @@ namespace WebApplication1
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseAuthentication();
+            // Needed for SAML-P token caching. Not needed if using WS-Federation.
+            app.UseSamlResponseCache();
 
-            //app.UseHttpsRedirection();
+            app.UseAuthentication();
 
             app.UseStaticFiles();
 

@@ -15,14 +15,14 @@ using WebApplication1.Util;
 
 namespace WebApplication1
 {
-    public class SamlResponseCache
+    public class SamlResponseCacheMiddleware
     {
         private const string SAML_RESPONSE_KEY = "SAMLResponse";
         private const string CLAIM_USER_NAME = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name";
 
         private readonly RequestDelegate _next;
 
-        public SamlResponseCache(RequestDelegate next)
+        public SamlResponseCacheMiddleware(RequestDelegate next)
         {
             this._next = next;
         }
@@ -115,7 +115,7 @@ namespace WebApplication1
     {
         public static IApplicationBuilder UseSamlResponseCache(this IApplicationBuilder builder)
         {
-            return builder.UseMiddleware<SamlResponseCache>();
+            return builder.UseMiddleware<SamlResponseCacheMiddleware>();
         }
     }
 }

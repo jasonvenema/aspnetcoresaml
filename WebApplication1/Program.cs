@@ -52,7 +52,7 @@ namespace WebApplication1
                     certificatePayload = memoryStream.ToArray();
                 }
 
-                return new X509Certificate2(certificatePayload, "shangh@i1234");
+                return new X509Certificate2(certificatePayload, "");
             }
         }
     }
